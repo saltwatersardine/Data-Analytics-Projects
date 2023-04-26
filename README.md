@@ -27,8 +27,9 @@ You can install these packages by running the following code in R:
 
 ```r
 install.packages(c("tidyverse", "ggplot2", "lubridate", "readr", "data.table", "dplyr"))
+```
 
-Once a package is installed, you can load it by running the library() function:
+Once packages are installed, you need load them by running the library function:
 
 ```r
 library(tidyverse, ggplot2, lubridate, readr, data.table, dplyr)
