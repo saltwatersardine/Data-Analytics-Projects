@@ -3,17 +3,14 @@
 This repository contains a collection of my data analytics projects. Each project is contained within its own directory and includes the source code, data, and a README file with a description of the project and its results.
 
 ### Project List
-1. Bike-Share Data Analysis Case Study
-   - [SQL](https://github.com/saltwatersardine/Data-Analytics-Projects/blob/main/Bike_Share_Data_Analysis_Case_Study_Using_R.md)
-   - R
-3. [Bellabeat data analysis](https://github.com/saltwatersardine/Data_Analytics/blob/main/bellabeat_data_analysis.md)
+1. [Bike-Share Data Analysis Case Study](https://github.com/saltwatersardine/Data-Analytics-Projects/blob/main/Bike_Share_Data_Analysis_Case_Study_Using_R.md)
+2. [Bellabeat data analysis](https://github.com/saltwatersardine/Data_Analytics/blob/main/bellabeat_data_analysis.md)
 
 ### Software
 
 Projects in this repository will be analysed using the following softwares:
 
-- R
-- SQL
+- `R` programming language and `RStudio` IDE
 
 You will also need to have the following R packages installed:
 
