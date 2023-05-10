@@ -25,21 +25,13 @@ For the analysis I will be using the `R` programming language and `RStudio` for 
 
 You are a junior data analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago. The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. Therefore, your team wants to understand how casual riders and annual members use Cyclistic bikes differently. From these insights, your team will design a new marketing strategy to convert casual riders into annual members. But first, Cyclistic executives must approve your recommendations, so they must be backed up with compelling data insights and professional data visualizations.
 
-**<ins>Business Task:</ins>** The aim of this analysis is to understand the differences in bike usage patterns between Cyclistic's annual members and casual riders to help design a marketing strategy to convert casual riders into annual members.
-
-**<ins>Key Stakeholders:</ins>**
-
-- Lily Moreno, the director of marketing and the manager for the marketing analyst team
-- Cyclistic's marketing analytics team
-- Cyclistic's executive team, who will decide whether to approve the recommended marketing program
-
-The next step is to **Ask** questions that clarify the problem, making sure we completely understand stakeholder expectations.
+The next step is to `Ask` questions that clarify the problem, making sure we completely understand stakeholder expectations.
 
 ## Ask
 
 Three questions will guide the future marketing program:
 
-1. How do annual members and casual riders use Cyclistic bikes differently?
+1. How do casual riders and annual members use Cyclistic bikes differently?
 2. Why would casual riders buy Cyclistic annual memberships?
 3. How can Cyclistic use digital media to influence casual riders to become members?
 
@@ -49,27 +41,24 @@ The director of marketing and your manager Lily Moreno has assigned you the firs
 
 **<ins>Key Tasks:</ins>**
 * [x] Identify the business task
-  - The aim of this analysis is to understand the differences in bike usage patterns between Cyclistic's annual members and casual riders to help design a marketing strategy to convert casual riders into annual members.
+  - The primary business task is to understand how annual members and casual riders use Cyclistic bikes differently. The insights derived from this analysis will be instrumental in guiding marketing strategies aimed at converting casual riders into annual members.
 * [x] Consider key stakeholders
-  - Cyclistic executive team, Director of Marketing (Lily Moreno), Marketing Analytics team.
+
+  - **Lily Moreno**, the Director of Marketing, who will use the insights to design and implement effective marketing strategies.
+  - **The Cyclistic Marketing Analytics Team**, who will assist in data collection, analysis, and reporting.
+  - **The Cyclistic Executive Team**, who will make the final decision on the proposed marketing strategies.
 
 **<ins>Deliverable:</ins>**
 * [x] A clear statement of the business task
-  - Find the different usage patterns of casual riders and annual members.
+  - Understand how annual members and casual riders use Cyclistic bikes differently to guide the development of marketing strategies aimed at converting casual riders into annual members.
 
-Some questions we might consider are:
+The problem we are trying to solve is the conversion of casual riders into annual members. This will increase the profitability of Cyclistic as annual members have been identified as more profitable than casual riders. The insights derived from this analysis can guide business decisions such as:
 
-- What are the most popular stations?
-- What are the peak hours for bike usage?
-- Are there any factors that could potentially lead to increased ridership?
+1. Designing targeted marketing strategies.
+2. Improving the features and services that matter most to casual riders, enhancing their experience and incentivizing them to become annual members.
+3. Providing valuable data-backed suggestions for the use of digital media to reach out to and influence casual riders.
 
-Key business questions:
-
-1. What are the usage patterns of casual riders and annual members?
-2. How do these usage patterns vary by day of the week, time of the day, and ride duration?
-3. What insights can be derived from these usage patterns to design a marketing strategy to convert casual riders into annual members?
-
-Next, we will prepare and process the data to ensure it is clean and well-structured for analysis.
+Next, we will `Prepare` and `Process` the data to ensure it is clean and well-structured for analysis.
 
 ## Prepare
 
@@ -77,13 +66,13 @@ I will use will use [Cyclistic’s historical trip data](https://divvy-tripdata.
 
 **<ins>Key Tasks</ins>**
 * [x] Download data and store it appropriately.
-  - I have securely downloaded the data from this [source](https://divvy-tripdata.s3.amazonaws.com/index.html) and made copies on both my computer and Github repository.
+  - Downloaded the previous 12 months of [Cyclistic trip data](https://divvy-tripdata.s3.amazonaws.com/index.html), and saved it in a created folder on my desktop using appropriate file-naming conventions.
 * [x] Identify how it’s organized.
-  - All trip data is in comma-delimited (.CSV) format. Column names "ride_id", "rideable_type", "started_at", "ended_at", "start_station_name", "start_station_id", "end_station_name", "end_station_id", "start_lat", "start_lng", "end_lat", "end_lng", "member_casual" (Total 13 column)
+  - Once the data is downloaded, I'll load it into RStudio and inspect the structure of the dataset. Look for the number of rows and columns, and understand what each column represents. In this case the all trip data is in comma-delimited (.CSV) format. Column names "ride_id", "rideable_type", "started_at", "ended_at", "start_station_name", "start_station_id", "end_station_name", "end_station_id", "start_lat", "start_lng", "end_lat", "end_lng", "member_casual" (Total 13 column)
 * [x] Sort and filter the data.
-  - To ensure that the analysis is based on the latest information related to the business task, I will utilize the data from the most recent 12 months.
+  - Based on the size of the dataset, the data used for this analysis will be from the latest 12 months.
 * [x] Determine the credibility of the data.
-  - I can answer the business questions using a public dataset for this case study. But, due to data privacy concerns, I can't use riders' personal information to determine if casual riders live in the Cyclistic service area or if they have bought multiple single passes.
+  - This data is provided by Motivate International Inc, so it should be reliable. Note that because of privacy considerations, the data does not include personally identifiable information. Therefore, some analyses (like connecting pass purchases to credit card numbers) will not be possible.
   - 
 **<ins>Deliverable</ins>**
 * [x] A description of all data sources used
@@ -92,8 +81,8 @@ I will use will use [Cyclistic’s historical trip data](https://divvy-tripdata.
 ### Load Packages
 
 Start by installing the required packages: `tidyverse`, `skimr`, `janitor`
-```r
 
+```r
 install.packages(c("tidyverse", "skimr", "janitor", "dplyr", "readr", "data.table"))
 ```
 
