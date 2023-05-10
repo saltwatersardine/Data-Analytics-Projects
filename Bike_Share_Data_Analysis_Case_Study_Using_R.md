@@ -35,7 +35,11 @@ Three questions will guide the future marketing program:
 2. Why would casual riders buy Cyclistic annual memberships?
 3. How can Cyclistic use digital media to influence casual riders to become members?
 
-To begin, we must understand the goals of the analysis. In this case, we want to help the Cyclistic attract more riders by analyzing their data and providing insights on how they can improve their services. 
+To begin, we must first understand the problem we are trying to solve is the conversion of casual riders into annual members. This will increase the profitability of Cyclistic as annual members have been identified as more profitable than casual riders. The insights derived from this analysis can guide business decisions such as:
+
+1. Designing targeted marketing strategies.
+2. Improving the features and services that matter most to casual riders, enhancing their experience and incentivizing them to become annual members.
+3. Providing valuable data-backed suggestions for the use of digital media to reach out to and influence casual riders.
 
 The director of marketing and your manager Lily Moreno has assigned you the first question to answer: How do annual members and casual riders use Cyclistic bikes differently?
 
@@ -50,19 +54,11 @@ The director of marketing and your manager Lily Moreno has assigned you the firs
 
 **<ins>Deliverable:</ins>**
 * [x] A clear statement of the business task
-  - Understand how annual members and casual riders use Cyclistic bikes differently to guide the development of marketing strategies aimed at converting casual riders into annual members.
-
-The problem we are trying to solve is the conversion of casual riders into annual members. This will increase the profitability of Cyclistic as annual members have been identified as more profitable than casual riders. The insights derived from this analysis can guide business decisions such as:
-
-1. Designing targeted marketing strategies.
-2. Improving the features and services that matter most to casual riders, enhancing their experience and incentivizing them to become annual members.
-3. Providing valuable data-backed suggestions for the use of digital media to reach out to and influence casual riders.
-
-Next, we will `Prepare` and `Process` the data to ensure it is clean and well-structured for analysis.
+  - The task is to understand how annual members and casual riders use Cyclistic bikes differently to guide the development of marketing strategies aimed at converting casual riders into annual members.
 
 ## Prepare
 
-I will use will use [Cyclistic’s historical trip data](https://divvy-tripdata.s3.amazonaws.com/index.html) to analyze and identify trends. The data has been made available by Motivate International Inc. under this [license](https://www.divvybikes.com/data-license-agreement).
+We will need to ensure that the dataset is clean and well-structured before proceeding with the analysis.
 
 **<ins>Key Tasks</ins>**
 * [x] Download data and store it appropriately.
@@ -76,66 +72,46 @@ I will use will use [Cyclistic’s historical trip data](https://divvy-tripdata.
   - 
 **<ins>Deliverable</ins>**
 * [x] A description of all data sources used
-  - The primary data source is provided by [Cyclistic](https://divvy-tripdata.s3.amazonaws.com/index.html), and it is a publicly available dataset.
+  - The primary data source is provided by [Cyclistic](https://divvy-tripdata.s3.amazonaws.com/index.html), and it is a publicly available dataset. The data has been made available by Motivate International Inc. under this [license](https://www.divvybikes.com/data-license-agreement).
 
-### Load Packages
+### Step 1: Load Packages
 
-Start by installing the required packages: `tidyverse`, `skimr`, `janitor`
+Start by installing the required packages: `tidyverse`, `janitor`, `lubridate`, `ggplot2`, `dplr`, `readr`
 
 ```r
-install.packages(c("tidyverse", "skimr", "janitor", "dplyr", "readr", "data.table"))
+install.packages(c("tidyverse", "janitor", "lubridate", "ggplot2", "dplyr", "readr"))
 ```
 
 Once a package is installed, you can load it by running the library() function
 
 ```r
 library(tidyverse)
-library(skimr)
 library(janitor)
+library(lubridate)
+library(ggplot2)
 library(dplyr)
 library(readr)
-library(data.table)
 ```
-I will first use the `file` tab in rstudio to upload the .csv files from my computer. 
+
+### Step 2: Import Data
+
+Use the `file` tab in rstudio to upload the .csv files from my computer. 
 
 <img width="438" alt="file_upload" src="https://user-images.githubusercontent.com/109593672/235165970-56cca0c7-ad34-41a3-a33c-d8561414c62a.png">
 
-You use use the `environment` tab to import the data, or alternatively click the file name in the file tab and import the dataset straight from there.
+Use the `environment` tab to import the data. Alternatively, click the file name in the file tab and import the dataset.
 
 <img width="438" alt="environment_import_dataset" src="https://user-images.githubusercontent.com/109593672/235164985-584d10cf-0173-4b1e-9817-007294f78ba4.png">
 
+This was done for each .csv from apr´22 - March´23
+
+### Step 3: Merge Monthly Data
+
+Merge individual monthly data frames into one large data frame
+
 ```r
-mar22 <- read_csv("divvy_tripdata/202203-divvy-tripdata.csv")
-apr22 <- read_csv("divvy_tripdata/202204-divvy-tripdata.csv")
-may22 <- read_csv("divvy_tripdata/202205-divvy-tripdata.csv")
-jun22 <- read_csv("divvy_tripdata/202206-divvy-tripdata.csv")
-jul22 <- read_csv("divvy_tripdata/202207-divvy-tripdata.csv")
-aug22 <- read_csv("divvy_tripdata/202208-divvy-tripdata.csv")
-sep22 <- read_csv("divvy_tripdata/202209-divvy-tripdata.csv")
-oct22 <- read_csv("divvy_tripdata/202210-divvy-tripdata.csv")
-nov22 <- read_csv("divvy_tripdata/202211-divvy-tripdata.csv")
-dec22 <- read_csv("divvy_tripdata/202212-divvy-tripdata.csv")
-jan23 <- read_csv("divvy_tripdata/202301-divvy-tripdata.csv")
-feb23 <- read_csv("divvy_tripdata/202302-divvy-tripdata.csv")
-mar23 <- read_csv("divvy_tripdata/202303-divvy-tripdata.csv")
+df_tripdata <- bind_rows(apr_22, may_22, jun_22, jul_22, aug_22, sep_22, oct_22, nov_22, dec_22, jan_23, feb_23, mar_23)
 ```
-
-To start, we need to gather the necessary data. The provided dataset contains the following columns:
-
-- `trip_id`
-- `start_time`
-- `end_time`
-- `bike_id`
-- `trip_duration`
-- `from_station_id`
-- `from_station_name`
-- `to_station_id`
-- `to_station_name`
-- `user_type`
-- `gender`
-- `birth_year`
-
-We will need to ensure that the dataset is clean and well-structured before proceeding with the analysis.
 
 ## Process
 Once we have the data, we need to preprocess it. This may include:
@@ -144,23 +120,42 @@ Checking for missing values and handling them appropriately.
 Converting data types (e.g., converting `start_time` and `end_time` to datetime objects).
 Creating new columns that may be helpful for analysis (e.g., `age`, `day_of_week`, `month`, `hour`).
 
-```sql
--- Check for missing values
-SELECT COUNT(*) AS missing_values
-FROM bike_share_data
-WHERE trip_id IS NULL
-  OR start_time IS NULL
-  OR end_time IS NULL
-  OR bike_id IS NULL
-  OR trip_duration IS NULL
-  OR from_station_id IS NULL
-  OR from_station_name IS NULL
-  OR to_station_id IS NULL
-  OR to_station_name IS NULL
-  OR user_type IS NULL
-  OR gender IS NULL
-  OR birth_year IS NULL;
+**<ins>Key Tasks</ins>**
+* [x] Check the data for errors.
+  - Get to know your data by using the `head()`, `str()`, `colnames()`, and `summarize()` functions to view and generate summary statistics.  
+* [x] Choose your tools.
+  - R and Rstudo (specifically the tidyverse library because of its powerful and user-friendly data manipulation functions)
+* [x] Transform the data so you can work with it effectively.
+  - Using the `arrange()`, `group_by()`, `filter()`, and `mutate()` functions to customise and change columns.  
+* [x] Document the cleaning process. 
+
+### Step 1: Getting to know the data:
+Start by checking for missing or inconsistent data. Look for outliers or unusual values, and check the data types of each column to make sure they match what you would expect (e.g., numerical columns should be stored as numbers, dates as date types, etc.)
+
+```r
+head(df_tripdata) #Shows the first several rows. 
+str(df_tripdata) #Shows a list of columns and their types.
+colnames(df_tripdata) #Shows a list of column names. 
+summarize(df_tripdata) #Shows data frame in just one value
 ```
+### Step 2: Transforming the data
+This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
+
+```r
+df_tripdata <- df_tripdata %>% 
+  mutate(year = format(as.Date(started_at), "%Y")) %>% # extract year
+  mutate(month = format(as.Date(started_at), "%B")) %>% #extract month
+  mutate(date = format(as.Date(started_at), "%d")) %>% # extract date
+  mutate(day_of_week = format(as.Date(started_at), "%A")) %>% # extract day of week
+  mutate(ride_length = difftime(ended_at, started_at)) %>% 
+  mutate(start_time = strftime(started_at, "%H"))
+```
+
+
+
+**<ins>Deliverable</ins>**
+* [x] Documentation of any cleaning or manipulation of data
+  - iajsbd
 
 ## Analyze
 With the data preprocessed, we can now begin analyzing it to answer our questions and generate insights.
