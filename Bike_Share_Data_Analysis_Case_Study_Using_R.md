@@ -142,6 +142,7 @@ summarize(df_tripdata) #Shows data frame in just one value
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
 
 ```r
+# before continuing, see if it isn't possible to use seperate()
 df_tripdata <- df_tripdata %>% 
   mutate(year = format(as.Date(started_at), "%Y")) %>% # extract year
   mutate(month = format(as.Date(started_at), "%B")) %>% #extract month
@@ -150,8 +151,13 @@ df_tripdata <- df_tripdata %>%
   mutate(ride_length = difftime(ended_at, started_at)) %>% 
   mutate(start_time = strftime(started_at, "%H"))
 ```
+Changing the `ride_length` to make it easier to do calculations on the data
 
-
+```r
+df_tripdata <- tripdata %>% 
+  mutate(ride_length = as.numeric(ride_length))
+is.numeric(tripdata$ride_length) # to check it is right format
+```
 
 **<ins>Deliverable</ins>**
 * [x] Documentation of any cleaning or manipulation of data
