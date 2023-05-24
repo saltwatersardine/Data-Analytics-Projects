@@ -76,24 +76,23 @@ We will need to ensure that the dataset is clean and well-structured before proc
 
 ### Step 1: Load Packages
 
-Start by installing the required packages: `tidyverse`, `janitor`, `lubridate`, `ggplot2`, `dplr`, `readr`
+Start by installing the required packages: `tidyverse`, `lubridate`, `ggplot2`, `dplr` and `readr`
 
 ```r
-install.packages(c("tidyverse", "janitor", "lubridate", "ggplot2", "dplyr", "readr"))
+install.packages(c("tidyverse", "lubridate", "ggplot2", "dplyr", "readr"))
 ```
 
 Once a package is installed, you can load it by running the library() function
 
 ```r
 library(tidyverse)
-library(janitor)
 library(lubridate)
 library(ggplot2)
 library(dplyr)
 library(readr)
 ```
 
-### Step 2: Import Data
+### Step 2: Importing Data
 
 Use the `file` tab in rstudio to upload the .csv files from my computer. 
 
@@ -105,12 +104,12 @@ Use the `environment` tab to import the data. Alternatively, click the file name
 
 This was done for each .csv from apr´22 - March´23
 
-### Step 3: Merge Monthly Data
+### Step 3: Merging Data 
 
-Merge individual monthly data frames into one large data frame
+Merge individual monthly data frames into single file
 
 ```r
-df_tripdata <- bind_rows(apr_22, may_22, jun_22, jul_22, aug_22, sep_22, oct_22, nov_22, dec_22, jan_23, feb_23, mar_23)
+all_tripdata <- bind_rows(apr_22, may_22, jun_22, jul_22, aug_22, sep_22, oct_22, nov_22, dec_22, jan_23, feb_23, mar_23)
 ```
 
 ## Process
@@ -118,53 +117,101 @@ Once we have the data, we need to preprocess it. This may include:
 
 Checking for missing values and handling them appropriately.
 Converting data types (e.g., converting `start_time` and `end_time` to datetime objects).
-Creating new columns that may be helpful for analysis (e.g., `age`, `day_of_week`, `month`, `hour`).
+Creating new columns that may be helpful for analysis (e.g., `year`, `month`, `day`, `day_of_week`, `ride_length`).
 
 **<ins>Key Tasks</ins>**
 * [x] Check the data for errors.
-  - Get to know your data by using the `head()`, `str()`, `colnames()`, and `summarize()` functions to view and generate summary statistics.  
+  - Get to know your data by using the `head()`, `str()`, `colnames()`, and `summary()` functions to view and summarize data.  
 * [x] Choose your tools.
   - R and Rstudo (specifically the tidyverse library because of its powerful and user-friendly data manipulation functions)
 * [x] Transform the data so you can work with it effectively.
-  - Using the `arrange()`, `group_by()`, `filter()`, and `mutate()` functions to customise and change columns.  
+  - Using the `transform` to customise and change columns.  
 * [x] Document the cleaning process. 
 
-### Step 1: Getting to know the data:
+### Step 1: Inspecting the Data:
 Start by checking for missing or inconsistent data. Look for outliers or unusual values, and check the data types of each column to make sure they match what you would expect (e.g., numerical columns should be stored as numbers, dates as date types, etc.)
 
 ```r
-head(df_tripdata) #Shows the first several rows. 
-str(df_tripdata) #Shows a list of columns and their types.
-colnames(df_tripdata) #Shows a list of column names. 
-summarize(df_tripdata) #Shows data frame in just one value
+head(all_tripdata) #Shows the first several rows. Also tail(all_tripdata)
+str(all_tripdata) #Shows a list of columns and their data types (numeric, character, etc).
+colnames(all_tripdata) #Shows a list of column names. 
+summary(all_tripdata) #Shows a summary of all records.
+
+# Inspect the new table that has been created
+colnames(all_trips)  #List of column names
+summary(all_trips)  #Statistical summary of data. Mainly for numerics
+
 ```
 ### Step 2: Transforming the data
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
 
 ```r
-# before continuing, see if it isn't possible to use seperate()
-df_tripdata <- df_tripdata %>% 
-  mutate(year = format(as.Date(started_at), "%Y")) %>% # extract year
-  mutate(month = format(as.Date(started_at), "%B")) %>% #extract month
-  mutate(date = format(as.Date(started_at), "%d")) %>% # extract date
-  mutate(day_of_week = format(as.Date(started_at), "%A")) %>% # extract day of week
-  mutate(ride_length = difftime(ended_at, started_at)) %>% 
-  mutate(start_time = strftime(started_at, "%H"))
+# Please note that you need to have the dplyr library loaded to use the %>% operator and the mutate() function.
+# separate() function doesn't work here because the day will still include time.
+         
+new_tripdata <- transform(all_tripdata, 
+         year = format(as.Date(started_at), "%Y"), 
+         month = format(as.Date(started_at), "%B"),
+         day = format(as.Date(started_at), "%d"),
+         day_of_week = format(as.Date(started_at), "%A"),
+         ride_length = difftime(ended_at, started_at),         
 ```
-Changing the `ride_length` to make it easier to do calculations on the data
+Changing `ride_length` from character to numeric for easier calculations.
 
 ```r
-df_tripdata <- tripdata %>% 
-  mutate(ride_length = as.numeric(ride_length))
-is.numeric(tripdata$ride_length) # to check it is right format
+new_tripdata$ride_length = as.numeric(as.character(new_tripdata$ride_length))
+
+is.numeric(new_tridata$ride_length) # to check it's in the right format
 ```
+Removing "bad" data from the dataframe, which includes a few hundred entries that involve bikes being taken out of docks for quality checks by Divvy or instances where the ride length is negative.
+
+```r
+clean_tripdata <- new_tripdata[!(new_tripdata$ride_length <= 0),]
+```
+
+More on date formats in R found here: 
+- [https://www.stat.berkeley.edu/~s133/dates.html](https://www.stat.berkeley.edu/~s133/dates.html)
+- [https://www.statmethods.net/input/dates.html](https://www.statmethods.net/input/dates.html)
 
 **<ins>Deliverable</ins>**
 * [x] Documentation of any cleaning or manipulation of data
-  - iajsbd
+  - You should have a clean, well-organized dataset ready for analysis. 
 
 ## Analyze
 With the data preprocessed, we can now begin analyzing it to answer our questions and generate insights.
+
+**<ins>Key Tasks</ins>**
+* [x] Aggregate your data so it’s useful and accessible.
+  - Summarizing the data by calculating the mean, median, max, min for both casual riders and annual members.
+* [x] Organize and format your data.
+* [x] Perform calculations.
+* [x] Identify trends and relationships.
+
+### Step 1: Find the Mean, Median, Max and Min
+
+```r
+clean_tripdata %>% 
+  summarise(average_ride_length = mean(ride_length), median_ride_length = median(ride_length), max_ride_length = max(ride_length), min_ride_length = min(ride_length))
+```
+### step 2: Comparing casual riders and annual members 
+
+```r
+# Please note, to use the group_by(), and filter() functions, you need to first need to install and load the dplyr and readr packages.
+
+clean_tripdata %>% 
+  group_by(member_casual)%>%
+  summarise(number_of_rides = n(), ride_average = (n() / nrow(clean_tripdata)) * 100)
+  
+
+
+
+
+
+
+```
+
+**<ins>Deliverable</ins>**
+* [x] A summary of the analysis
 
 ## Popular Stations
 To find the most popular stations, we can count the number of trips starting and ending at each station.
@@ -206,38 +253,8 @@ FROM bike_share_data
 GROUP BY day_of_week
 ORDER BY day_of_week;
 
--- Trips by month
-SELECT EXTRACT(MONTH FROM start_time) AS month, COUNT(*) AS num_trips
-FROM bike_share_data
-GROUP BY month
-ORDER BY month;
-```
-Next, we can analyze the average trip duration by user type, gender, and age group to understand how different demographics use the service.
 
-```sql
--- Average trip duration by user type
-SELECT user_type, AVG(trip_duration) AS avg_trip_duration
-FROM bike_share_data
-GROUP BY user_type;
 
--- Average trip duration by gender
-SELECT gender, AVG(trip_duration) AS avg_trip_duration
-FROM bike_share_data
-WHERE gender IS NOT NULL
-GROUP BY gender;
-
--- Average trip duration by age group
-SELECT
-  CASE
-    WHEN EXTRACT(YEAR FROM AGE(NOW(), birth_year)) < 30 THEN 'Under 30'
-    WHEN EXTRACT(YEAR FROM AGE(NOW(), birth_year)) BETWEEN 30 AND 59 THEN '30-59'
-    ELSE '60 and over'
-  END AS age_group,
-  AVG(trip_duration) AS avg_trip_duration
-FROM bike_share_data
-WHERE birth_year IS NOT NULL
-GROUP BY age_group;
-```
 
 ## Share
 Based on our analysis, we can provide the following insights for the bike-share company:
