@@ -162,9 +162,8 @@ new_tripdata <- transform (all_tripdata,
          day_of_week = format(as.Date(started_at), "%A"), # Full weekday.
          ride_length = difftime(ended_at, started_at))    # difftime = difference in time between start and end.       
 ```
-
+`Result:`
 <img width="488" alt="colnames" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a1aa63ad-b9f3-491d-a51a-4930541266de">
-
 
 **Note:** The separate() function cannot be used here because it includes the time in the day column.
 
@@ -207,6 +206,7 @@ clean_tripdata %>%
   max_ride_length = max(ride_length), 
   min_ride_length = min(ride_length))
 ```
+`Result:`
 <img width="467" alt="Av_length" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a2851cfd-3a54-4242-93e8-301e6d51e960">
 
 - The data available here represents 'ride_length' for 2022. The smallest and largest ride lengths appear to be unusually disproportionate. They seem way too extreme compared to the rest. We're not sure why yet, but we definitely need to investigate further.
@@ -221,18 +221,18 @@ Note: To use the group_by() and filter() functions, you must first install and l
 clean_tripdata %>% 
   group_by(member_casual)%>%
   summarise(number_of_rides = n(), ride_average = (n() / nrow(clean_tripdata)) * 100)
-  
-ggplot(clean_tripdata, aes(x = member_casual, fill=member_casual)) +
-    geom_bar() +
-    labs(x="Casuals vs Members", y="Number Of Rides", title= "Casuals vs Members distribution")
-    
+   
 ggplot(data = clean_tripdata) +
   geom_bar(mapping = aes(x = member_casual, fill=member_casual)) +
   labs(x="Casual vs Member", y="Number Of Rides", title= "Casuals vs Members distribution")
-
 ```
+`Result:`
 <img width="468" alt="sum_groupby" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/7e915061-6c6a-4d2e-84fe-f878734202e4">
  
+`And:`
+<img width="501" alt="casual_vs_members_graph" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/7626f39d-c0cc-4ca2-b012-f7c4e7435843">
+
+
 
 **<ins>Deliverable</ins>**
 * [x] A summary of the analysis
