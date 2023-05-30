@@ -66,7 +66,7 @@ We will need to ensure that the dataset is clean and well-structured before proc
 * [x] Identify how it’s organized.
   - Once the data is downloaded, I'll load it into RStudio and inspect the structure of the dataset. Look for the number of rows and columns, and understand what each column represents. In this case the all trip data is in comma-delimited (.CSV) format. Column names "ride_id", "rideable_type", "started_at", "ended_at", "start_station_name", "start_station_id", "end_station_name", "end_station_id", "start_lat", "start_lng", "end_lat", "end_lng", "member_casual" (Total 13 column)
 * [x] Sort and filter the data.
-  - Based on the size of the dataset, the data used for this analysis will be from the latest 12 months.
+  - Based on the size of the dataset, the data used for this analysis will be for 2022 (Jan-Dec).
 * [x] Determine the credibility of the data.
   - This data is provided by Motivate International Inc, so it should be reliable. Note that because of privacy considerations, the data does not include personally identifiable information. Therefore, some analyses (like connecting pass purchases to credit card numbers) will not be possible.
   - 
@@ -79,7 +79,7 @@ We will need to ensure that the dataset is clean and well-structured before proc
 Start by installing the required packages: `tidyverse`, `lubridate`, `ggplot2`, `dplr` and `readr`
 
 ```r
-install.packages(c("tidyverse", "lubridate", "ggplot2", "dplyr", "readr"))
+install.packages(c("tidyverse", "lubridate", "ggplot2", "dplyr", "readr", "purrr"))
 ```
 
 Once a package is installed, you can load it by running the library() function
@@ -90,6 +90,7 @@ library(lubridate)
 library(ggplot2)
 library(dplyr)
 library(readr)
+library(purrr)
 ```
 
 ### Step 2: Importing Data
@@ -102,14 +103,22 @@ Use the `environment` tab to import the data. Alternatively, click the file name
 
 <img width="438" alt="environment_import_dataset" src="https://user-images.githubusercontent.com/109593672/235164985-584d10cf-0173-4b1e-9817-007294f78ba4.png">
 
-This was done for each .csv from apr´22 - March´23
+This was done for each .csv from jan22 - dec22
 
 ### Step 3: Merging Data 
 
 Merge individual monthly data frames into single file
 
 ```r
-all_tripdata <- bind_rows(apr_22, may_22, jun_22, jul_22, aug_22, sep_22, oct_22, nov_22, dec_22, jan_23, feb_23, mar_23)
+all_tripdata <- bind_rows(jan22, feb22, mar22, apr22, may22, jun22, jul22, aug22, sep22, oct22, nov22, dec22)
+```
+### Alternative way of importing and merging data
+This can also be done using the code:
+```r
+all_tripdata <- list.files(path = "*<FILE PATH>", # Used to identify all csv files in a folder. 
+  pattern = "*.csv",
+  full.names = TRUE) %>%   # Gives the complete file path, not just the file name.
+  map_df(read_csv)  # Uses the full path to easily find and open each file.
 ```
 
 ## Process
@@ -132,16 +141,17 @@ Creating new columns that may be helpful for analysis (e.g., `year`, `month`, `d
 Start by checking for missing or inconsistent data. Look for outliers or unusual values, and check the data types of each column to make sure they match what you would expect (e.g., numerical columns should be stored as numbers, dates as date types, etc.)
 
 ```r
-head(all_tripdata) #Shows the first several rows. Also tail(all_tripdata)
-str(all_tripdata) #Shows a list of columns and their data types (numeric, character, etc).
-colnames(all_tripdata) #Shows a list of column names. 
-summary(all_tripdata) #Shows a summary of all records.
+head(all_tripdata) # Shows the first several rows. Also tail(all_tripdata).
+str(all_tripdata) # Shows a list of columns and their data types (numeric, character, etc).
+colnames(all_tripdata) # Shows a list of column names. 
+summary(all_tripdata) # Shows a summary of all records.
 
-# Inspect the new table that has been created
-colnames(all_trips)  #List of column names
-summary(all_trips)  #Statistical summary of data. Mainly for numerics
-
+# Inspect the new table that has been created.
+colnames(all_trips)  # List of column names.
+summary(all_trips)  # Statistical summary of data - mainly for numerics-
 ```
+<img width="488" alt="colnames" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a1aa63ad-b9f3-491d-a51a-4930541266de">
+
 ### Step 2: Transforming the data
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
 
@@ -149,26 +159,25 @@ This might involve creating new columns, aggregating data, reshaping the data, o
 # Please note that you need to have the dplyr library loaded to use the %>% operator and the mutate() function.
 # separate() function doesn't work here because the day will still include time.
          
-new_tripdata <- transform(all_tripdata, 
-         year = format(as.Date(started_at), "%Y"), 
-         month = format(as.Date(started_at), "%B"),
-         day = format(as.Date(started_at), "%d"),
-         day_of_week = format(as.Date(started_at), "%A"),
-         ride_length = difftime(ended_at, started_at),         
+new_tripdata <- transform (all_tripdata, 
+         year = format(as.Date(started_at), "%Y"), #Year (4 digit).
+         month = format(as.Date(started_at), "%B"), #Full month.
+         day = format(as.Date(started_at), "%d"), #Decimal date.
+         day_of_week = format(as.Date(started_at), "%A"), #Full weekday.
+         ride_length = difftime(ended_at, started_at), #difftime = difference in time between end and start.       
 ```
 Changing `ride_length` from character to numeric for easier calculations.
 
 ```r
 new_tripdata$ride_length = as.numeric(as.character(new_tripdata$ride_length))
 
-is.numeric(new_tridata$ride_length) # to check it's in the right format
+is.numeric(new_tripdata$ride_length) # Checking to see if it's in the right format.
 ```
 Removing "bad" data from the dataframe, which includes a few hundred entries that involve bikes being taken out of docks for quality checks by Divvy or instances where the ride length is negative.
 
 ```r
 clean_tripdata <- new_tripdata[!(new_tripdata$ride_length <= 0),]
 ```
-
 More on date formats in R found here: 
 - [https://www.stat.berkeley.edu/~s133/dates.html](https://www.stat.berkeley.edu/~s133/dates.html)
 - [https://www.statmethods.net/input/dates.html](https://www.statmethods.net/input/dates.html)
@@ -191,8 +200,15 @@ With the data preprocessed, we can now begin analyzing it to answer our question
 
 ```r
 clean_tripdata %>% 
-  summarise(average_ride_length = mean(ride_length), median_ride_length = median(ride_length), max_ride_length = max(ride_length), min_ride_length = min(ride_length))
+  summarise(average_ride_length = mean(ride_length), 
+  median_ride_length = median(ride_length), 
+  max_ride_length = max(ride_length), 
+  min_ride_length = min(ride_length))
 ```
+<img width="497" alt="average" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/814b8e4a-04a7-43e8-b0e6-5b2ddec9453f">
+
+- The data we've got here is about 'ride_length' from april 2022 - May 2023. The smallest and largest ride lengths seem a bit out of proportion. We can't figure out why just yet with the info we have, but we definitely need to take a closer look.
+- 
 ### step 2: Comparing casual riders and annual members 
 
 ```r
@@ -202,13 +218,16 @@ clean_tripdata %>%
   group_by(member_casual)%>%
   summarise(number_of_rides = n(), ride_average = (n() / nrow(clean_tripdata)) * 100)
   
-
-
-
-
-
+ggplot(clean_tripdata, aes(x = member_casual, fill=member_casual)) +
+    geom_bar() +
+    labs(x="Casuals vs Members", y="Number Of Rides", title= "Casuals vs Members distribution")
+    
+ggplot(data = clean_tripdata) +
+  geom_bar(mapping = aes(x = member_casual, fill=member_casual)) +
+  labs(x="Casual vs Member", y="Number Of Rides", title= "Casuals vs Members distribution")
 
 ```
+<img width="494" alt="member_casual" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/b47eefbd-3bc8-47c8-a1ee-737754b27c6f">
 
 **<ins>Deliverable</ins>**
 * [x] A summary of the analysis
