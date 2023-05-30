@@ -145,13 +145,9 @@ Start by checking for missing or inconsistent data. Look for outliers or unusual
 ```r
 head(all_tripdata)      # Shows the first several rows. Also tail(all_tripdata).
 str(all_tripdata)       # Shows a list of columns and their data types (numeric, character, etc).
+colnames(all_tripdata)  # List of column names.
+summary(all_tripdata)   # Statistical summary of data - mainly for numerics.
 ```
-Take a look at the newly created table for inspection.
-```r
-colnames(all_tripdata)   # List of column names.
-summary(all_tripdata)    # Statistical summary of data - mainly for numerics.
-```
-<img width="488" alt="colnames" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a1aa63ad-b9f3-491d-a51a-4930541266de">
 
 ### Step 2: Transforming the data
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
@@ -166,6 +162,10 @@ new_tripdata <- transform (all_tripdata,
          day_of_week = format(as.Date(started_at), "%A"), # Full weekday.
          ride_length = difftime(ended_at, started_at))    # difftime = difference in time between start and end.       
 ```
+
+<img width="488" alt="colnames" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a1aa63ad-b9f3-491d-a51a-4930541266de">
+
+
 **Note:** The separate() function cannot be used here because it includes the time in the day column.
 
 Changing `ride_length` from character to numeric for easier calculations.
@@ -207,15 +207,17 @@ clean_tripdata %>%
   max_ride_length = max(ride_length), 
   min_ride_length = min(ride_length))
 ```
-<img width="497" alt="average" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/814b8e4a-04a7-43e8-b0e6-5b2ddec9453f">
+<img width="467" alt="Av_length" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a2851cfd-3a54-4242-93e8-301e6d51e960">
 
-- The data we've got here is about 'ride_length' from april 2022 - May 2023. The smallest and largest ride lengths seem a bit out of proportion. We can't figure out why just yet with the info we have, but we definitely need to take a closer look.
-- 
+- The data available here represents 'ride_length' for 2022. The smallest and largest ride lengths appear to be unusually disproportionate. They seem way too extreme compared to the rest. We're not sure why yet, but we definitely need to investigate further.
+
 ### step 2: Comparing casual riders and annual members 
 
-```r
-# Please note, to use the group_by(), and filter() functions, you need to first need to install and load the dplyr and readr packages.
+We will now begin to compare the casual riders with wth annual members 
 
+Note: To use the group_by() and filter() functions, you must first install and load the `dplyr` and `readr` packages.
+
+```r
 clean_tripdata %>% 
   group_by(member_casual)%>%
   summarise(number_of_rides = n(), ride_average = (n() / nrow(clean_tripdata)) * 100)
@@ -229,7 +231,8 @@ ggplot(data = clean_tripdata) +
   labs(x="Casual vs Member", y="Number Of Rides", title= "Casuals vs Members distribution")
 
 ```
-<img width="494" alt="member_casual" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/b47eefbd-3bc8-47c8-a1ee-737754b27c6f">
+<img width="468" alt="sum_groupby" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/7e915061-6c6a-4d2e-84fe-f878734202e4">
+ 
 
 **<ins>Deliverable</ins>**
 * [x] A summary of the analysis
