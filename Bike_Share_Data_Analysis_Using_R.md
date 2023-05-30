@@ -99,11 +99,11 @@ Use the `file` tab in rstudio to upload the .csv files from my computer.
 
 <img width="438" alt="file_upload" src="https://user-images.githubusercontent.com/109593672/235165970-56cca0c7-ad34-41a3-a33c-d8561414c62a.png">
 
-Use the `environment` tab to import the data. Alternatively, click the file name in the file tab and import the dataset.
+Use the `environment` tab to import the data. 
 
 <img width="438" alt="environment_import_dataset" src="https://user-images.githubusercontent.com/109593672/235164985-584d10cf-0173-4b1e-9817-007294f78ba4.png">
 
-This was done for each .csv from jan22 - dec22
+Alternatively, click the file name in the file tab and import the dataset. This was done for each .csv from jan22 - dec22
 
 ### Step 3: Merging Data 
 
@@ -112,10 +112,12 @@ Merge individual monthly data frames into single file
 ```r
 all_tripdata <- bind_rows(jan22, feb22, mar22, apr22, may22, jun22, jul22, aug22, sep22, oct22, nov22, dec22)
 ```
-### Alternative way of importing and merging data
-This can also be done using the code:
+### Step 4: Another way to import and merge data.
+If you use the code below, you can skip steps 2 and 3. Just make sure you have the `dplyr`, `readr`, and `purrr` libraries installed.
+
 ```r
-all_tripdata <- list.files(path = "*<FILE PATH>", # Used to identify all csv files in a folder. 
+all_tripdata <- 
+  list.files(path = "<FILE PATH>", # Used to find all csv files in a folder. Replace <FILE PATH> with the path to your folder.
   pattern = "*.csv",
   full.names = TRUE) %>%   # Gives the complete file path, not just the file name.
   map_df(read_csv)  # Uses the full path to easily find and open each file.
@@ -141,39 +143,39 @@ Creating new columns that may be helpful for analysis (e.g., `year`, `month`, `d
 Start by checking for missing or inconsistent data. Look for outliers or unusual values, and check the data types of each column to make sure they match what you would expect (e.g., numerical columns should be stored as numbers, dates as date types, etc.)
 
 ```r
-head(all_tripdata) # Shows the first several rows. Also tail(all_tripdata).
-str(all_tripdata) # Shows a list of columns and their data types (numeric, character, etc).
-colnames(all_tripdata) # Shows a list of column names. 
-summary(all_tripdata) # Shows a summary of all records.
-
-# Inspect the new table that has been created.
-colnames(all_trips)  # List of column names.
-summary(all_trips)  # Statistical summary of data - mainly for numerics-
+head(all_tripdata)      # Shows the first several rows. Also tail(all_tripdata).
+str(all_tripdata)       # Shows a list of columns and their data types (numeric, character, etc).
+```
+Take a look at the newly created table for inspection.
+```r
+colnames(all_tripdata)   # List of column names.
+summary(all_tripdata)    # Statistical summary of data - mainly for numerics.
 ```
 <img width="488" alt="colnames" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a1aa63ad-b9f3-491d-a51a-4930541266de">
 
 ### Step 2: Transforming the data
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
 
-```r
-# Please note that you need to have the dplyr library loaded to use the %>% operator and the mutate() function.
-# separate() function doesn't work here because the day will still include time.
-         
+**Note:** You should have the `dplyr` library loaded to use the "%>%" operator and the "mutate()" function. The mutate() function is used to replace any inconsistencies in the "member_casual" column. For example, it replaces "Subscriber" with "member" and "Customer" with "casual".  
+
+```r         
 new_tripdata <- transform (all_tripdata, 
-         year = format(as.Date(started_at), "%Y"), #Year (4 digit).
-         month = format(as.Date(started_at), "%B"), #Full month.
-         day = format(as.Date(started_at), "%d"), #Decimal date.
-         day_of_week = format(as.Date(started_at), "%A"), #Full weekday.
-         ride_length = difftime(ended_at, started_at), #difftime = difference in time between end and start.       
+         year = format(as.Date(started_at), "%Y"),        # Year (4 digit).
+         month = format(as.Date(started_at), "%B"),       # Full month.
+         day = format(as.Date(started_at), "%d"),         # Decimal date.
+         day_of_week = format(as.Date(started_at), "%A"), # Full weekday.
+         ride_length = difftime(ended_at, started_at))    # difftime = difference in time between start and end.       
 ```
+**Note:** The separate() function cannot be used here because it includes the time in the day column.
+
 Changing `ride_length` from character to numeric for easier calculations.
 
 ```r
 new_tripdata$ride_length = as.numeric(as.character(new_tripdata$ride_length))
 
-is.numeric(new_tripdata$ride_length) # Checking to see if it's in the right format.
+is.numeric(new_tripdata$ride_length) # This is used to check if it is in the right format.
 ```
-Removing "bad" data from the dataframe, which includes a few hundred entries that involve bikes being taken out of docks for quality checks by Divvy or instances where the ride length is negative.
+Removing "bad" data from the dataframe. This includes a few hundred entries that involve bikes being taken out of docks for quality checks by Divvy or instances where the ride length is negative.
 
 ```r
 clean_tripdata <- new_tripdata[!(new_tripdata$ride_length <= 0),]
