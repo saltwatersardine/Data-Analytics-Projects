@@ -79,7 +79,7 @@ We will need to ensure that the dataset is clean and well-structured before proc
 Start by installing the required packages: `tidyverse`, `lubridate`, `ggplot2`, `dplr` and `readr`
 
 ```r
-install.packages(c("tidyverse", "lubridate", "ggplot2", "dplyr", "readr", "purrr"))
+install.packages(c("tidyverse", "lubridate", "ggplot2", "dplyr", "readr", "purrr", "goesphere"))
 ```
 
 Once a package is installed, you can load it by running the library() function
@@ -91,6 +91,7 @@ library(ggplot2)
 library(dplyr)
 library(readr)
 library(purrr)
+library(geosphere)
 ```
 
 ### Step 2: Importing Data
@@ -174,11 +175,20 @@ new_tripdata$ride_length = as.numeric(as.character(new_tripdata$ride_length))
 
 is.numeric(new_tripdata$ride_length) # This is used to check if it is in the right format.
 ```
-Removing "bad" data from the dataframe. This includes a few hundred entries that involve bikes being taken out of docks for quality checks by Divvy or instances where the ride length is negative.
+Adding ride distance in km:
+```r
+new_tripdata$ride_distance <- distGeo(matrix(c(new_tripdata$start_lng, new_tripdata$start_lat), ncol = 2), matrix(c(new_tripdata$end_lng, new_tripdata$end_lat), ncol = 2))
 
+# Measures the distance between the start and end coordinates of each trip using distGeo() from the geosphere package. This code creates a matrix of start and end coordinates and calculates the geographical distance between them. 
+
+new_tripdata$ride_distance <- new_tripdata$ride_distance/1000 #distance in km
+```
+
+Removing "bad" data from the dataframe. This includes a few hundred entries that involve bikes being taken out of docks for quality checks by Divvy or instances where the ride length is negative.
 ```r
 clean_tripdata <- new_tripdata[!(new_tripdata$ride_length <= 0),]
 ```
+
 More on date formats in R found here: 
 - [https://www.stat.berkeley.edu/~s133/dates.html](https://www.stat.berkeley.edu/~s133/dates.html)
 - [https://www.statmethods.net/input/dates.html](https://www.statmethods.net/input/dates.html)
