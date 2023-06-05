@@ -69,7 +69,7 @@ We will need to ensure that the dataset is clean and well-structured before proc
   - Based on the size of the dataset, the data used for this analysis will be for 2022 (Jan-Dec).
 * [x] Determine the credibility of the data.
   - This data is provided by Motivate International Inc, so it should be reliable. Note that because of privacy considerations, the data does not include personally identifiable information. Therefore, some analyses (like connecting pass purchases to credit card numbers) will not be possible.
-  - 
+
 **<ins>Deliverable</ins>**
 * [x] A description of all data sources used
   - The primary data source is provided by [Cyclistic](https://divvy-tripdata.s3.amazonaws.com/index.html), and it is a publicly available dataset. The data has been made available by Motivate International Inc. under this [license](https://www.divvybikes.com/data-license-agreement).
@@ -98,12 +98,17 @@ library(geosphere)
 
 Use the `file` tab in rstudio to upload the .csv files from my computer. 
 
-<img width="438" alt="file_upload" src="https://user-images.githubusercontent.com/109593672/235165970-56cca0c7-ad34-41a3-a33c-d8561414c62a.png">
+<div>
+  <img width="438" alt="file_upload" src="https://user-images.githubusercontent.com/109593672/235165970-56cca0c7-ad34-41a3-a33c-d8561414c62a.png">
+</div>
+<br>
 
-Use the `environment` tab to import the data. 
+Use the `environment` tab to import the data.
 
-<img width="438" alt="environment_import_dataset" src="https://user-images.githubusercontent.com/109593672/235164985-584d10cf-0173-4b1e-9817-007294f78ba4.png">
-
+<div>
+  <img width="438" alt="environment_import_dataset" src="https://user-images.githubusercontent.com/109593672/235164985-584d10cf-0173-4b1e-9817-007294f78ba4.png">
+</div>
+<br>
 Alternatively, click the file name in the file tab and import the dataset. This was done for each .csv from jan22 - dec22
 
 ### Step 3: Merging Data 
@@ -153,7 +158,7 @@ summary(all_tripdata)   # Statistical summary of data - mainly for numerics.
 ### Step 2: Transforming the data
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, we need to aggregate the data by user type (casual riders vs. annual members), and by time (e.g., daily, weekly, monthly). 
 
-**Note:** You should have the `dplyr` library loaded to use the "%>%" operator and the "mutate()" function. The mutate() function is used to replace any inconsistencies in the "member_casual" column. For example, it replaces "Subscriber" with "member" and "Customer" with "casual".  
+_**Note:**_ You should have the `dplyr` library loaded to use the "%>%" operator and the "mutate()" function. The mutate() function is used to replace any inconsistencies in the "member_casual" column. For example, it replaces "Subscriber" with "member" and "Customer" with "casual".  
 
 ```r         
 new_tripdata <- transform (all_tripdata, 
@@ -164,9 +169,12 @@ new_tripdata <- transform (all_tripdata,
          ride_length = difftime(ended_at, started_at))    # difftime = difference in time between start and end.       
 ```
 `Result:`
+<div>
 <img width="488" alt="colnames" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a1aa63ad-b9f3-491d-a51a-4930541266de">
+</div>
+<br>
 
-**Note:** The separate() function cannot be used here because it includes the time in the day column.
+_**Note:**_ The separate() function cannot be used here because it includes the time in the day column.
 
 Changing `ride_length` from character to numeric for easier calculations.
 
@@ -177,9 +185,11 @@ is.numeric(new_tripdata$ride_length) # This is used to check if it is in the rig
 ```
 Adding ride distance in km:
 ```r
-new_tripdata$ride_distance <- distGeo(matrix(c(new_tripdata$start_lng, new_tripdata$start_lat), ncol = 2), matrix(c(new_tripdata$end_lng, new_tripdata$end_lat), ncol = 2))
+new_tripdata$ride_distance <- distGeo
+# Measures the distance between the start and end coordinates of each trip using distGeo() from the geosphere package.
 
-# Measures the distance between the start and end coordinates of each trip using distGeo() from the geosphere package. This code creates a matrix of start and end coordinates and calculates the geographical distance between them. 
+(matrix(c(new_tripdata$start_lng, new_tripdata$start_lat), ncol = 2), matrix(c(new_tripdata$end_lng, new_tripdata$end_lat), ncol = 2))
+# This code creates a matrix of start and end coordinates and calculates the geographical distance between them. 
 
 new_tripdata$ride_distance <- new_tripdata$ride_distance/1000 #distance in km
 ```
@@ -217,9 +227,12 @@ clean_tripdata %>%
   min_ride_length = min(ride_length))
 ```
 `Result:`
+<br>
+<div>
 <img width="467" alt="Av_length" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/a2851cfd-3a54-4242-93e8-301e6d51e960">
+</div>
 
-- The data available here represents 'ride_length' for 2022. The smallest and largest ride lengths appear to be unusually disproportionate. They seem way too extreme compared to the rest. We're not sure why yet, but we definitely need to investigate further.
+The data available here represents 'ride_length' for 2022. The smallest and largest ride lengths appear to be unusually disproportionate. They seem way too extreme compared to the rest. We're not sure why yet, but we definitely need to investigate further.
 
 ### step 2: Comparing casual riders and annual members 
 
@@ -237,12 +250,31 @@ ggplot(data = clean_tripdata) +
   labs(x="Casual vs Member", y="Number Of Rides", title= "Casuals vs Members distribution")
 ```
 `Result:`
+<br>
+<div>
 <img width="468" alt="sum_groupby" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/7e915061-6c6a-4d2e-84fe-f878734202e4">
- 
-`And:`
-<img width="501" alt="casual_vs_members_graph" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/7626f39d-c0cc-4ca2-b012-f7c4e7435843">
+</div>
+<br>
+<div>
+<img width="300" alt="casual_vs_members_graph" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/2ab0edb2-693f-4343-a8c4-e20bae3378d3">
+</div>
 
+In 2022, members used ride-sharing services 18% more than casual riders, as shown in the distribution chart where members make up 59% and casual riders make up 41% of the dataset.
 
+The comparison between member and casual riders is made based on ride length, considering metrics such as mean, median, minimum, and maximum values.
+
+```r
+clean_tripdata %>%
+  group_by(member_casual) %>% 
+  summarise(average_ride_length = mean(ride_length), median_length = median(ride_length), 
+            max_ride_length = max(ride_length), min_ride_length = min(ride_length))
+```
+`Result:`
+
+<div>
+  <img width="621" alt="average_comparision" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/1d51a188-8127-4b0a-aa0a-c2daff4adabe">
+</div>
+<br>
 
 **<ins>Deliverable</ins>**
 * [x] A summary of the analysis
