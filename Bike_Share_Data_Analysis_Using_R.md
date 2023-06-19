@@ -166,7 +166,8 @@ new_tripdata <- transform (all_tripdata,
          month = format(as.Date(started_at), "%B"),       # Full month.
          day = format(as.Date(started_at), "%d"),         # Decimal date.
          day_of_week = format(as.Date(started_at), "%A"), # Full weekday.
-         ride_length = difftime(ended_at, started_at))    # difftime = difference in time between start and end.       
+         ride_length = difftime(ended_at, started_at),    # difftime = difference in time between start and end.
+         start_time = strftime(started_at, "%H"))           
 ```
 `Result:`
 <div>
@@ -217,6 +218,9 @@ With the data preprocessed, we can now begin analyzing it to answer our question
 * [x] Perform calculations.
 * [x] Identify trends and relationships.
 
+**<ins>Deliverable</ins>**
+* [x] A summary of the analysis
+
 ### Step 1: Find the Mean, Median, Max and Min
 
 ```r
@@ -261,7 +265,7 @@ ggplot(data = clean_tripdata) +
 
 In 2022, members used ride-sharing services 18% more than casual riders, as shown in the distribution chart where members make up 59% and casual riders make up 41% of the dataset.
 
-The comparison between member and casual riders is made based on ride length, considering metrics such as mean, median, minimum, and maximum values.
+**The comparison between member and casual riders is made based on ride length, considering metrics such as mean, median, minimum, and maximum values.**
 
 ```r
 clean_tripdata %>%
@@ -276,94 +280,213 @@ clean_tripdata %>%
 </div>
 <br>
 
-**<ins>Deliverable</ins>**
-* [x] A summary of the analysis
+Based on the table above, it's clear that casual riders tend to take longer rides than members. This is because the average trip duration or ride length for casual riders is higher compared to that of member riders.
 
-## Popular Stations
-To find the most popular stations, we can count the number of trips starting and ending at each station.
+**Average ride times for members and casual users, listed in order by each day of the week.**
+```r
+clean_tripdata$day_of_week <- ordered(clean_tripdata$day_of_week, 
+                                    levels=c("Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+**Analyze ridership data by type and weekday.**
+```r
+clean_tripdata %>% 
+  group_by(member_casual, day_of_week) %>%  #groups by member_casual
+  summarise(number_of_rides = n(), #calculates the number of rides and average duration 
+  average_ride_length = mean(ride_length)) %>% # calculates the average duration
+  arrange(member_casual, day_of_week)
+```
+`Result:`
 
-```sql
--- Most popular starting stations
-SELECT from_station_name, COUNT(*) AS num_starts
-FROM bike_share_data
-GROUP BY from_station_name
-ORDER BY num_starts DESC
-LIMIT 5;
+<div>
+  <img width="623" alt="groups_2" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/f9690df9-a9bf-4092-9756-1f8e4c8e0580">
+</div>
+<br>
 
--- Most popular ending stations
-SELECT to_station_name, COUNT(*) AS num_ends
-FROM bike_share_data
-GROUP BY to_station_name
-ORDER BY num_ends DESC
-LIMIT 5;
+**visualize the number of rides by rider type.**
+```r
+clean_tripdata %>%  
+  group_by(member_casual, day_of_week) %>% 
+  summarise(number_of_rides = n(), .groups="drop") %>% 
+  arrange(member_casual, day_of_week)  %>% 
+  ggplot(aes(x = day_of_week, y = number_of_rides, fill = member_casual)) +
+  labs(title ="Total Rides: Members vs. Casual Riders by Day") +
+  geom_col(position = "dodge") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
 ```
 
-## Peak Hours
-To find the peak hours for bike usage, we can group trips by the hour and count the number of trips.
+`Result:`
 
-```sql
--- Peak hours
-SELECT EXTRACT(HOUR FROM start_time) AS hour, COUNT(*) AS num_trips
-FROM bike_share_data
-GROUP BY hour
-ORDER BY num_trips DESC;
+<div>
+  <img width="563" alt="Total_rides_vis" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/8a55208c-d4c6-4a10-9413-dfe34691ef4c">
+</div>
+<br>
+
+The chart shows that members had consistent trip numbers throughout the week, while casual riders had the most rides on weekends, with a peak on Saturday.
+
+**Visualize average ride time data by type and day of week.**
+```r
+clean_tripdata %>%  
+  group_by(member_casual, day_of_week) %>% 
+  summarise(average_ride_length = mean(ride_length), .groups="drop") %>%
+  ggplot(aes(x = day_of_week, y = average_ride_length, fill = member_casual)) +
+  geom_col(position = "dodge") + 
+  theme(axis.text.x = element_text(angle = 30)) +
+  labs(title ="Average Ride Time: Members vs. Casual Riders by Day")
+```
+`Result:`
+
+<div>
+  <img width="563" alt="Average_ride_time" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/75b70aaa-e137-40fd-9c8f-0013003218ec">
+</div>
+<br>
+
+As seen above, members typically have shorter average ride lengths than casual riders. Casual riders, on the other hand, tend to have higher average ride lengths and more rides on weekends. This indicates a connection between longer rides and weekends for casual riders. In contrast, members maintain a relatively consistent average ride length below 1000 seconds throughout the week.
+
+Take a look at the total rides and average ride time for members and casual riders, categorized by each month.
+
+```r
+clean_tripdata$month <- ordered(clean_tripdata$month, 
+                            levels=c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"))
+
+clean_tripdata %>% 
+  group_by(member_casual, month) %>%  
+  summarise(number_of_rides = n(), average_ride_length = mean(ride_length), .groups="drop") %>% 
+  arrange(member_casual, month)
+```
+`Result:`
+
+<div>
+  <img width="602" alt="year_summary" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/fb0cfd80-f8be-43ae-87c4-d2fb4d4425fd">
+</div>
+<br>
+
+**Visualize total rides data by type and month**
+
+```r
+clean_tripdata %>%  
+  group_by(member_casual, month) %>% 
+  summarise(number_of_rides = n(),.groups="drop") %>% 
+  arrange(member_casual, month)  %>% 
+  ggplot(aes(x = month, y = number_of_rides, fill = member_casual)) +
+  labs(title ="Total Rides: Members vs. Casual Riders by Month", x = "Month", y= "Number Of Rides") +
+  geom_col(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
 ```
 
-## Rider Behavior
-To analyze rider behavior based on the day of the week or season, we can group trips by these variables and compare the results.
+`Result:`
 
-```sql
--- Trips by day of the week
-SELECT EXTRACT(DOW FROM start_time) AS day_of_week, COUNT(*) AS num_trips
-FROM bike_share_data
-GROUP BY day_of_week
-ORDER BY day_of_week;
+<div>
+  <img width="471" alt="monthly_total_rides " src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/71fd100a-ec81-4245-a765-ddc237ec981a">
+</div>
+<br> 
 
+June, July, August, and September are the busiest months for both members and casual riders. This could be attributed to a decrease in total rides during the winter months of November, December, January, and February for both customer types. However, throughout the year, members generally have higher total rides compared to casual riders, except for June, July, and August.
 
+**Visualize average ride time data by type and month**
+```r
+clean_tripdata %>%  
+  group_by(member_casual, month) %>% 
+  summarise(average_ride_length = mean(ride_length),.groups="drop") %>%
+  ggplot(aes(x = month, y = average_ride_length, fill = member_casual)) +
+  geom_col(position = "dodge") + 
+  labs(title ="Average Ride Time: Members vs. Casual Riders by Month") +
+  theme(axis.text.x = element_text(angle = 30))
+  ```
+  
+`Result:`
 
+<div>
+  <img width="472" alt="Average_ride_time_month" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/1173353a-abfa-4126-bfe0-f6c24e1f9319">
+</div>
+<br> 
+
+The average ride length for members remains consistently below 1000 seconds throughout the year. On the other hand, casual riders have an average ride length ranging between 1000 and 2000 seconds throughout the year. 
+
+**Analyzing the bike demand at different hours of the day**
+
+```r
+clean_tripdata %>%
+  ggplot(aes(start_time, fill= member_casual)) +
+  labs(x="Time of day", title="Hourly bike demand", y = "Count") +
+  geom_bar()+
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+`Result:`
+
+<div>
+  <img width="443" alt="hourly_bike_demand" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/81b93b8f-12a0-45a4-99d5-39579cd671d9">
+</div>
+<br>
+
+The graph displays a gentle rise in bike demand starting at 7am, reaching a peak in the afternoon around 7pm. This pattern suggests an increase in bike usage after regular working hours.
+
+**Analyzing the bike demand per hour and categorized by the day of the week.**
+
+```r
+clean_tripdata %>%
+    ggplot(aes(start_time, fill=member_casual)) +
+    geom_bar() +
+    labs(x="Time of day (hours).", title="Bike demand by hour and day of the week.") +
+    theme(plot.title = element_text(hjust = 0.5))+
+    facet_wrap(~ day_of_week)
+ ```
+ 
+ `Result:`
+
+<div>
+  <img width="470" alt="Hour_Weekday" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/3e8e5f37-b9b4-413e-bc69-65b8aac8fde5">
+</div>
+<br>
+ 
+Weekdays and weekends have different bike usage patterns. On weekdays, there is a noticeable increase in bike volume during morning (7am-10am) and evening (5pm-7pm) hours, indicating members use bikes for daily commuting. On the other hand, weekends show a significant peak in bike volume for casual riders on Friday, Saturday, and Sunday. This suggests that casual riders use bikes more for leisure activities on weekends.
 
 ## Share
-Based on our analysis, we can provide the following insights for the bike-share company:
 
-1. The most popular stations, both for starting and ending trips.
-2. The peak hours for bike usage, which can be useful for managing bike availability and maintenance schedules.
-3. Rider behavior trends, such as variations in trip volume based on the day of the week or season, and differences in average trip duration by user type, gender, and age group.
+Now that you've finished analyzing the data and gained valuable insights, it's time to create eye-catching and polished visualizations to showcase your findings. It's essential to make sure these visualizations are sophisticated and well-presented, as they will help effectively communicate with the executive team. 
+
+**<ins>Key Tasks</ins>**
+
+* [x] Determine the best way to share your findings.
+* [x] Create effective data visualizations.
+* [x] Present your findings.
+* [x] Ensure your work is accessible.
+
+**<ins>Deliverable</ins>**
+
+[x] Supporting visualizations and key findings
+
+Key Insights and Concluding Findings
+
+- Members account for the majority of total rides, approximately 18% more than casual riders, but casual riders account more for the average ride time.
+- Throughout all months, the number of members exceeds that of casual riders.
+- Casual riders contribute a significant volume of rides during the weekends.
+- Afternoon hours exhibit a higher volume for riders.
+- It is likely that members utilize bikes for work-related purposes, supported by the reduced amount of rides on weekends, the peeks before and after work, and the lower presence of casual riders during colder months.
+
+Differences between Members and Casual Riders:
+
+- Members generally contribute a larger volume of data, except on Saturdays and Sundays, where casual riders have the most data points.
+- Casual riders tend to have longer ride durations compared to members. Members' average ride times remain relatively consistent, with a slight increase towards the end of the week.
+- During the morning hours, particularly between 7am and 10am, there is a higher presence of members. In contrast, casual riders are more active between 3pm and 12am.
+- Classic bikes are preferred by members, followed by electric bikes.
+- Members demonstrate a more predictable usage pattern for routine activities, while casual riders exhibit different usage patterns, with the majority of their rides occurring on weekends.
+- Casual riders tend to spend more time near the city center or the bay area, whereas members are dispersed throughout the city.
 
 These insights can help the company identify areas for improvement and potential opportunities for attracting more riders.
 
 ## Act
-Based on the insights gained from our analysis, the bike-share company could consider the following actions:
+Based on the insights gained from the analysis, the Cyclistic's executive team, alongside their Director of Marketing, Lily Moreno, and the Marketing Analytics team, can get down to work on the next steps the bike-share company might take.
 
-1. Increase the number of bikes and docking stations at popular locations to meet demand.
+**<ins>Deliverable</ins>**
+
+[x] Your top three recommendations based on your analysis
+
+1. Offer a weekend-only annual membership, with a different price point than the full annual membership. 
 2. Optimize bike maintenance schedules to ensure maximum bike availability during peak hours.
-3. Develop targeted marketing campaigns to attract specific demographics, such as offering discounts for certain user types or promoting the service to underrepresented age groups.
-4. Investigate further into the factors influencing ridership trends, such as weather conditions, local events, or pricing structures.
+3. Consider offering coupons and discounts for annual subscriptions or weekend-only memberships, specifically targeting casual riders.
+4. Investigate further into the factors influencing ridership trends, such as weather conditions, local events, or e-bike usage.
 
 By implementing these recommendations, the company can improve its services and attract more riders, ultimately leading to increased revenue and growth.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
