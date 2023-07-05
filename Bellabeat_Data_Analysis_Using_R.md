@@ -56,7 +56,7 @@ Let's proceed with the 'Prepare' stage of the project making sure the dataset is
 
 **<ins>Key Tasks:</ins>**
 * [x] Download data and store it appropriately.
-  - The data we are using is stored and saved in a folder created on my desktop using appropriate file-naming conventions it will also be stored on Github.
+  - The data we are using is stored and saved in a folder created on my desktop using appropriate file-naming conventions. It will also be stored on Github.
 * [x] Identify how it’s organized.
   - We'll need to download and explore the dataset to determine its organization and format.
 * [x] Sort and filter the data.
@@ -89,28 +89,16 @@ library(readr)
 
 ### Step 2: Import and Merge Data
 
-Method 1: Each file is read using the read_csv(), and the resulting dataframes are individually added. 
+Method 1: Each file is read using the read_csv(), and the resulting data frames are individually added. 
 
 ```r
-activity_daily <- read_csv("bellabeat_data/dailyActivity_merged.csv")
-calories_daily <- read_csv("bellabeat_data/dailyCalories_merged.csv")
-intensities_daily <- read_csv("bellabeat_data/dailyIntensities_merged.csv")
-steps_daily <- read_csv("bellabeat_data/dailySteps_merged.csv")
-sleep_daily <- read_csv("bellabeat_data/sleepDay_merged.csv")
-weight_daily <- read_csv("bellabeat_data/weightLogInfo_merged.csv")
+daily_activity <- read_csv("bellabeat_data/dailyActivity_merged.csv")
+daily_calories <- read_csv("bellabeat_data/dailyCalories_merged.csv")
+daily_intensities <- read_csv("bellabeat_data/dailyIntensities_merged.csv")
+daily_steps <- read_csv("bellabeat_data/dailySteps_merged.csv")
+daily_sleep <- read_csv("bellabeat_data/sleepDay_merged.csv")
+weight_info <- read_csv("bellabeat_data/weightLogInfo_merged.csv")
 ```
-
-Method 2: Each file is read using read_csv(), and the resulting dataframes are combined row-wise into a single dataframe.  
-
-```r
-all_fitnessdata <- 
-  list.files(path = "<FILE PATH>", pattern = "*.csv", full.names = TRUE) %>%   
-  map_df(read_csv)  
-```
-
-* list.files finds all the csv files in a folder. Replace <FILE PATH> with the path to your folder.
-* full.names gives you the complete file path, not just the file name.
-* map_df uses the full path to easily find and open each file.
   
 We are now ready to move on to the `Process` phase of the project.
 
@@ -118,7 +106,7 @@ We are now ready to move on to the `Process` phase of the project.
 
 **<ins>Key Tasks:</ins>**
 * [x] Check the data for errors.
-  -   - Get to know your data by using the `head()`, `str()`, `colnames()`, and `summary()` functions to view and summarize data.
+  - Get to know your data by using the `head()`, `str()`, `colnames()`, and `summary()` functions to view and summarize data.
 * [x] Choose your tools.
   - R and RStudio as my main tool for data cleaning and analysis.
 * [x] Transform the data so you can work with it effectively.
@@ -127,32 +115,203 @@ We are now ready to move on to the `Process` phase of the project.
 
 **<ins>Deliverable:</ins>**
 * [x] Documentation of any cleaning or manipulation of data:
+  - Add underscores between the words in column names and changed all column names to lowercase.
+  - Rename date columns and correct date formatting.  
+  - Add a date column to all the datasets in date format for merging later.
+  - Removed columns that were no longer required for the analysis process.
 
 ### Step 1: Inspect the Data:
 Start by checking for missing or inconsistent data. Look for outliers or unusual values, and check the data types of each column to make sure they match what you would expect (e.g., numerical columns should be stored as numbers, dates as date types, etc.)
+
+Checking for Distinct Entries
+```r
+daily_activity %>% summarise(n_distinct(Id))
+daily_calories %>% summarise(n_distinct(Id))
+daily_intensities %>% summarise(n_distinct(Id))
+daily_sleep %>% summarise(n_distinct(Id))
+daily_steps %>% summarise(n_distinct(Id))
+weight_info %>% summarise(n_distinct(Id))
+```
+
+There are some issues with the timestamp data. Before analyzing, it needs to be converted into a date-time format and split into separate date and time components.
   
-There are some issues with the timestamp data. Before analyzing, it needs to be converted it into a date-time format and split it into separate date and time components.
-  
-### Step 2: Transform the data
+### Step 2: Transform the Data
 This might involve creating new columns, aggregating data, reshaping the data, or other transformations. For example, the sleep and weight datasets include date and time.
 
-Use the `separate()` function to split the `sleep_daily` and `weight_daily` date columns into their own date and time columns.
+Let's tidy up and standardize the column names by adding an underscore.
 
 ```r
-sleep_daily <- sleep_daily %>% 
-  separate(SleepDay,c("SleepDate","SleepTime")," ")
-  
-weight_daily <- weight_daily %>% 
-  separate(Date,c("WeightDate","WeightTime")," ")
+daily_activity <- clean_names(daily_activity)
+daily_calories <- clean_names(daily_calories)
+daily_intensities <- clean_names(daily_intensities)
+daily_sleep <- clean_names(daily_sleep)
+daily_steps <- clean_names(daily_steps)
+weight_info <- clean_names(weight_info)
 ```
-
-Or, if you're working with the combined data, you could separate the columns all at once.
+Let's go ahead and lowercase those column names.
 
 ```r
-all_fitnessdata <- all_fitnessdata %>%
-  separate(SleepDay, c("SleepDate", "SleepTime"), sep = " ") %>%
-  separate(Date, c("WeightDate", "WeightTime"), sep = " ")
+daily_activity=rename_with(daily_activity,tolower)
+daily_calories=rename_with(daily_calories,tolower)
+daily_intensities=rename_with(daily_intensities,tolower)
+daily_sleep=rename_with(daily_sleep,tolower)
+daily_steps=rename_with(daily_steps,tolower)
+weight_info=rename_with(weight_info,tolower)
+```
+We'll use the rename() function to give them better names, and then the mutate() function to convert them into the correct data types.
+
+```r
+daily_activity <- daily_activity %>% 
+  rename(date = activity_date) %>%
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+  
+daily_calories <- daily_calories %>% 
+  rename(date = activity_day) %>%
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+
+daily_intensities <- daily_intensities %>% 
+  rename(date = activity_day) %>%
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+
+daily_steps <- daily_steps %>% 
+  rename(date = activity_day) %>%
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+  
+daily_sleep <- daily_sleep %>% 
+  rename(date = sleep_day) %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+
+weight_info <- weight_info %>% 
+  select(-log_id) %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y")) %>% 
+  mutate(is_manual_report = as.factor(is_manual_report))
+```
+* as.factor converts a variable into a categorical factor.
+
+### Step 3: Merge the Data 
+
+```r
+merged_data <- merge(merge(daily_activity, daily_sleep, by=c('id','date'), all = TRUE), 
+                     weight_info, by = c('id','date'), all = TRUE)
 ```
 
-With the dates appropriately formatted and all dataframes thoroughly reviewed for errors, I can now proceed to the 'Analyze' phase of the project.
-  
+### Step 4: Remove extra Variables 
+
+```r
+merged_data <- merged_data %>% 
+  select(-c(tracker_distance, logged_activities_distance, total_sleep_records, weight_pounds, fat, bmi, is_manual_report))
+```
+### Step 5: Adding new Columns
+
+We need to create new columns to aggregate the data by date (e.g. daily, weekly, monthly, yearly). 
+
+```r
+final_data <- transform (merged_data, 
+         year = format(as.Date(date), "%Y"),          # Year (4 digit).
+         month = format(as.Date(date), "%B"),         # Full month.
+         day = format(as.Date(date), "%d"),           # Decimal date.
+         weekday = format(as.Date(date), "%A"))       # Full weekday.
+```
+We dont use the weekdays() function here because we want to keep data. 
+
+### Step 6: Putting Weekdays in Order
+
+```r
+final_data$weekday <- ordered(final_data$weekday, 
+                                      levels=c("Sunday","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+
+With the dates appropriately formatted and all data frames thoroughly reviewed for errors, I can now proceed to the `Analyze` phase of the project.
+
+## Analyze
+
+**<ins>Key Tasks:</ins>**
+* [x] Aggregate your data so it’s useful and accessible.
+* [x] Organize and format your data.
+* [x] Perform calculations.
+* [x] Identify trends and relationships.
+
+**<ins>Deliverable:</ins>**
+* [x] A summary of your analysis:
+
+### Step 1: Find the Mean, Median, Max, and Min
+
+Mean, Median, Max, and Min for total steps. 
+```r
+final_data %>%
+  summarise(average_steps = mean(total_steps), median_length = median(total_steps), 
+            max_steps = max(total_steps), min_steps = min(total_steps))
+```
+
+`Result:`
+<div>
+  <img width="1000" alt="AverageSteps" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/122704b5-5495-4a25-8203-60a4e6efb062">
+</div>
+<br>
+
+Mean, Median, Max, and Min for total calories. 
+
+```r
+final_data %>%
+  summarise(average_calories = mean(calories), median_length = median(calories), 
+            max_steps = max(calories), min_steps = min(calories))
+```
+
+`Result:`
+<div>
+<img width="1000" alt="averageCalories" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/72e36688-55f6-404a-8e7f-906c62a5657d">
+</div>
+<br>
+
+Let's check if there's a link between the total steps and the day of the week.
+
+```r
+ggplot(data = final_data) +
+  geom_bar(mapping = aes(x = weekday, y = total_steps, fill = weekday), stat = "sum") +
+  labs(title = "TOTAL STEPS BY WEEKDAY", x = "Weekday", y = "Total Steos") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
+
+`Result:`
+<div>
+  <img width="530" alt="TotalSteps_DayOfWeek" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/21c13183-b3a6-44e8-bb0b-637049540212">
+</div>
+<br>
+
+Let's check if there's a link between the calories and the day of the week.
+
+```r
+ggplot(data = final_data) +
+  geom_bar(mapping = aes(x = weekday, y = calories, fill = weekday), stat = "sum") +
+  labs(title = "CALORIES BY WEEKDAY", x = "Weekday", y = "Total Calories") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
+
+`Result:`
+<div>
+  <img width="530" alt="TotalCalories_DayOfWeek" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/6ab1845e-a0e5-40cc-bbad-5f1863cef56c">
+</div>
+<br>
+
+Let's check if there's a link between the total steps and and calories.
+
+```r
+ggplot(data = final_data) +
+  geom_point(mapping = aes(x = total_steps, y = calories)) +
+  geom_smooth(mapping = aes(x = total_steps, y = calories), colour = "blue") +
+  labs(title = "TOTAL STEPS VS CALORIES", x = "Total Steps", y = "Total Calories") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
+`Result:`
+<div>
+  <img width="530" alt="totalsteps_totalcals" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/ab800b1e-26a1-4dcb-8a1c-218f43a7cf28">
+</div>
+<br>
+
+These two variables show a strong positive correlation: as the number of steps taken in a day increases, the amount of calories burned also increases.
+
+Now lets see the 
+Now, let's proceed to the next phase of the project, which is the `Share` phase. 
