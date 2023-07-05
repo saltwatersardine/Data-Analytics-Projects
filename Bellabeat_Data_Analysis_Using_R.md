@@ -184,9 +184,9 @@ daily_sleep <- daily_sleep %>%
 weight_info <- weight_info %>% 
   select(-log_id) %>% 
   mutate(date = as.Date(date, format = "%m/%d/%y")) %>% 
-  mutate(is_manual_report = as.factor(is_manual_report))
+  mutate(is_manual_report = as.factor(is_manual_report)) # as.factor converts a variable into a categorical factor.
+
 ```
-* as.factor converts a variable into a categorical factor.
 
 ### Step 3: Merge the Data 
 
@@ -237,6 +237,7 @@ With the dates appropriately formatted and all data frames thoroughly reviewed f
 ### Step 1: Find the Mean, Median, Max, and Min
 
 Mean, Median, Max, and Min for total steps. 
+
 ```r
 final_data %>%
   summarise(average_steps = mean(total_steps), median_length = median(total_steps), 
@@ -248,19 +249,6 @@ final_data %>%
   <img width="1000" alt="AverageSteps" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/122704b5-5495-4a25-8203-60a4e6efb062">
 </div>
 <br>
-
-Mean, Median, Max, and Min for total calories. 
-
-```r
-final_data %>%
-  summarise(average_calories = mean(calories), median_length = median(calories), 
-            max_steps = max(calories), min_steps = min(calories))
-```
-
-`Result:`
-<div>
-<img width="1000" alt="averageCalories" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/72e36688-55f6-404a-8e7f-906c62a5657d">
-</div>
 <br>
 
 Let's check if there's a link between the total steps and the day of the week.
@@ -277,6 +265,22 @@ ggplot(data = final_data) +
 <div>
   <img width="530" alt="TotalSteps_DayOfWeek" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/21c13183-b3a6-44e8-bb0b-637049540212">
 </div>
+<br>
+<br>
+
+Mean, Median, Max, and Min for total calories. 
+
+```r
+final_data %>%
+  summarise(average_calories = mean(calories), median_length = median(calories), 
+            max_steps = max(calories), min_steps = min(calories))
+```
+
+`Result:`
+<div>
+<img width="1000" alt="averageCalories" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/72e36688-55f6-404a-8e7f-906c62a5657d">
+</div>
+<br>
 <br>
 
 Let's check if there's a link between the calories and the day of the week.
@@ -313,5 +317,28 @@ ggplot(data = final_data) +
 
 These two variables show a strong positive correlation: as the number of steps taken in a day increases, the amount of calories burned also increases.
 
-Now lets see the 
+Now lets see the differences in differences for each activity.
+
+```r
+ggplot(data = gather(summarise(final_data,
+                               "Sedentary Distance" = sum(sedentary_active_distance, na.rm = TRUE),
+                               "Very Active Distance"= sum(very_active_distance, na.rm = TRUE),
+                               "Moderately Active Distance" = sum(moderately_active_distance, na.rm = TRUE),
+                               "Light Distance" = sum(light_active_distance, na.rm = TRUE)), 
+                     Activity, Distance)) +
+  geom_bar(aes(x = Activity, y = Distance, fill = Activity), 
+           stat = "identity", position = "dodge") +
+  labs(x = "Activity", y = "Total Distance", title = "Total Distance per Activity Level") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
+```
+
+`Result:`
+<div>
+  <img width="428" alt="Distance_activity" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/86d17982-f08e-4b96-a2e6-38956f6ac33f">
+</div>
+<br>
+
+
+
+
 Now, let's proceed to the next phase of the project, which is the `Share` phase. 
