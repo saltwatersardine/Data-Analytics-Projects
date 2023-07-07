@@ -234,90 +234,97 @@ With the dates appropriately formatted and all data frames thoroughly reviewed f
 **<ins>Deliverable:</ins>**
 * [x] A summary of your analysis:
 
-### Step 1: Find the Mean, Median, Max, and Min
+Let's analyze the relationship between total steps, total calories and the day of the week.
 
-Mean, Median, Max, and Min for total steps. 
+First, we can find the average steps and calories consumed per day of the week:
 
 ```r
-final_data %>%
-  summarise(average_steps = mean(total_steps), median_length = median(total_steps), 
-            max_steps = max(total_steps), min_steps = min(total_steps))
+# Average steps per day of the week
+avg_steps_weekday <- final_data %>%
+  group_by(weekday) %>%
+  summarise(avg_steps = mean(total_steps, na.rm = TRUE))
+
+# Average calories per day of the week
+avg_calories_weekday <- final_data %>%
+  group_by(weekday) %>%
+  summarise(avg_calories = mean(calories, na.rm = TRUE))
 ```
 
-`Result:`
-<div>
-  <img width="1000" alt="AverageSteps" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/122704b5-5495-4a25-8203-60a4e6efb062">
-</div>
-<br>
-<br>
+Now, let's visualize these relationships.
 
-Let's check if there's a link between the total steps and the day of the week.
+Average steps per day of the week:
+
+```r
+ggplot(data = avg_steps_weekday, aes(x = weekday, y = avg_steps, fill = weekday)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Steps by Day of the Week",
+       x = "Day of the Week",
+       y = "Average Steps") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
+```
+
+<img width="349" alt="AvgSteps_DOW" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/5d0274a8-73ca-475a-9adb-692d0ce7250d">
+
+Average calories per day of the week:
+
+```r
+ggplot(data = avg_calories_weekday, aes(x = weekday, y = avg_calories, fill = weekday)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Calories by Day of the Week",
+       x = "Day of the Week",
+       y = "Average Calories") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
+```
+
+<img width="347" alt="AvgCals_DOW" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/95e3e277-2533-480e-8afa-a6ae184ed25c">
+
+These graphs show the average number of steps taken and calories consumed each day of the week. You might observe trends such as more steps or calories being consumed on certain days.
+
+Let's check if there's a link between the total steps and calories.
+
+```r
+ggplot(data = final_data, aes(x = total_steps, y = calories)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(color = "red") +
+  labs(title = "Total Steps vs. Total Calories",
+       x = "Total Steps",
+       y = "Total Calories") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+<img width="347" alt="TotalSteps_TotalCals" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/6f0e08a6-5597-4f68-9daa-65aeaa6d2fb5">
+
+This plot shows the total steps on the x-axis and the total calories on the y-axis. Each point represents a day. The red line is the line of best fit. It indicates that as total steps increase, total calories also tend to increase, which we would expect.
+
+Let's visualize sleep duration and total distance covered.
+
+```r
+ggplot(data = final_data, na.rm = TRUE) +
+  geom_point(mapping = aes(x = total_minutes_asleep, y = total_distance, color = weekday)) +
+  labs(title = "Sleep Duration vs. Total Distance", x = "Total Minutes Asleep", y = "Total Distance Covered") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
+
+<img width="455" alt="Sleep_distance" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/6304bd15-48a2-45d0-b0fe-722c5dd78368">
+
+In this plot, each point represents a day for a user. The color of the point signifies the day of the week. This plot shows if there's a relationship between the amount of sleep a user gets and the total distance they travel.
+
+Let's also visualize how sedentary minutes change over the course of a week:
 
 ```r
 ggplot(data = final_data) +
-  geom_bar(mapping = aes(x = weekday, y = total_steps, fill = weekday), stat = "sum") +
-  labs(title = "TOTAL STEPS BY WEEKDAY", x = "Weekday", y = "Total Steos") +
+  geom_bar(mapping = aes(x = weekday, y = sedentary_minutes, fill = weekday), stat = "sum") +
+  labs(title = "Sedentary Minutes by Day of the Week", x = "Weekday", y = "Total Sedentary Minutes") +
   theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
   scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
 ```
 
-`Result:`
-<div>
-  <img width="530" alt="TotalSteps_DayOfWeek" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/21c13183-b3a6-44e8-bb0b-637049540212">
-</div>
-<br>
-<br>
+<img width="455" alt="SedentaryMin_Weekday" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/6b575c46-405a-44c1-a753-8701878c2ab5">
 
-Mean, Median, Max, and Min for total calories. 
+This plot show if users are more sedentary on certain days of the week, which can inform targeted interventions or messaging.
 
-```r
-final_data %>%
-  summarise(average_calories = mean(calories), median_length = median(calories), 
-            max_steps = max(calories), min_steps = min(calories))
-```
-
-`Result:`
-<div>
-<img width="1000" alt="averageCalories" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/72e36688-55f6-404a-8e7f-906c62a5657d">
-</div>
-<br>
-<br>
-
-Let's check if there's a link between the calories and the day of the week.
-
-```r
-ggplot(data = final_data) +
-  geom_bar(mapping = aes(x = weekday, y = calories, fill = weekday), stat = "sum") +
-  labs(title = "CALORIES BY WEEKDAY", x = "Weekday", y = "Total Calories") +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
-```
-
-`Result:`
-<div>
-  <img width="530" alt="TotalCalories_DayOfWeek" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/6ab1845e-a0e5-40cc-bbad-5f1863cef56c">
-</div>
-<br>
-
-Let's check if there's a link between the total steps and and calories.
-
-```r
-ggplot(data = final_data) +
-  geom_point(mapping = aes(x = total_steps, y = calories)) +
-  geom_smooth(mapping = aes(x = total_steps, y = calories), colour = "blue") +
-  labs(title = "TOTAL STEPS VS CALORIES", x = "Total Steps", y = "Total Calories") +
-  theme(plot.title = element_text(hjust = 0.5), legend.position = "none") +
-  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
-```
-`Result:`
-<div>
-  <img width="530" alt="totalsteps_totalcals" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/ab800b1e-26a1-4dcb-8a1c-218f43a7cf28">
-</div>
-<br>
-
-These two variables show a strong positive correlation: as the number of steps taken in a day increases, the amount of calories burned also increases.
-
-Now lets see the differences in differences for each activity.
+Now lets see how much distance, on average, is covered by users in each activity level.
 
 ```r
 ggplot(data = gather(summarise(final_data,
@@ -332,13 +339,78 @@ ggplot(data = gather(summarise(final_data,
   theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
 ```
 
-`Result:`
-<div>
-  <img width="428" alt="Distance_activity" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/86d17982-f08e-4b96-a2e6-38956f6ac33f">
-</div>
-<br>
+<img width="347" alt="Distance_Activity" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/37c68bbb-11cc-45e8-bb4a-38ea7af25beb">
 
+In this plot, the X-axis represents the different activity types (very active, moderately active, light active, sedentary), and the Y-axis shows the average distance covered in each activity type. The different colors in the bar represent each activity type. 
 
+Next, lets categorize users based on their total steps as highly active, moderately active, and less active. Then, visualize the categories.
 
+```r
+final_data <- final_data %>%
+  mutate(activity_category = case_when(total_steps > 15000 ~ "Highly active",
+                                       total_steps <= 15000 & total_steps > 8000 ~ "Moderately active",
+                                       TRUE ~ "Less active"))
+  
+ggplot(data = final_data) +
+  geom_bar(mapping = aes(x = weekday, fill = activity_category), position = "dodge") +
+  labs(title = "USER ACTIVITY LEVEL BY WEEKDAY", x = "Weekday", y = "Count") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+``
 
-Now, let's proceed to the next phase of the project, which is the `Share` phase. 
+<img width="454" alt="Activity_Weekday" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/57b80eb8-7cc6-44a5-bf3f-315b466dd60f">
+
+This plot shows how activity levels vary across different days of the week.
+
+Now let's visualize the relationship between Time in Bed vs Total Minutes Asleep.
+
+```r
+final_data <- final_data %>%
+  mutate(time_in_bed = total_minutes_asleep + total_minutes_awake)
+
+ggplot(data = final_data, na.rm = TRUE) +
+  geom_point(mapping = aes(x = time_in_bed, y = total_minutes_asleep, color = weekday)) +
+  labs(title = "Time in Bed vs. Total Minutes Asleep", x = "Time in Bed (minutes)", y = "Total Minutes Asleep") +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+  scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
+
+<img width="455" alt="Bed_MinAsleep" src="https://github.com/saltwatersardine/Data-Analytics-Projects/assets/109593672/b17901a6-5ddd-423e-b0f1-d99461b5a1db">
+
+This plot reveals how much of the total time spent in bed is actually spent sleeping. This indicates the quality of sleep the users are getting.
+
+Now, let's proceed to the next phase of the project, which is the `Act` phase. 
+
+## Act
+
+Now that we have finished creating the visualizations, we nned to act on the findings. Prepare the deliverables and offer high-level recommendations based on the analysis. 
+
+**<ins>Key Tasks:</ins>**
+* [x] Create your portfolio.
+* [x] Add your case study.
+* [x] Transform the data so you can work with it effectively.
+* [x] Document the cleaning process.
+  - I will document each step of the cleaning process in a reproducible R script. The cleaning process would involve steps like removing duplicates, handling missing or inconsistent data, and converting data types if needed.
+
+**<ins>Deliverable:</ins>**
+* [x] Your top high-level insights based on your analysis
+
+### Discoveries
+
+The findings revealed several interesting patterns. For instance, user activity levels varied by the day of the week, with higher activity levels observed on weekdays compared to weekends. We also observed a relationship between total steps and total calories burned, with more active users tending to burn more calories. Moreover, we found that there was a variation in the awake times for different user types, indicating a possible correlation between activity levels and sleep patterns.
+
+### Conclusion and Next Steps
+
+The insights gained from this analysis can inform strategies for user engagement and product development at Fitbit. For example, features or incentives could be developed to encourage users to maintain their activity levels over the weekend. Future steps could include investigating why certain user types have longer awake times and developing features to help these users improve their sleep. Additionally, other data sources could be incorporated to provide a more holistic view of user behavior, such as dietary information or data from other health and wellness apps.
+
+### In light of our findings
+
+Most participants are largely sedentary. To help change this, we suggest that the Fitbit app should send regular reminders to users, encouraging them to move and hydrate regularly. 
+
+Adding goal-setting capabilities for daily or weekly targets, such as calories burned or steps taken, would motivate users towards more active lifestyles. Embedding motivational quotes or health-related articles could educate and inspire users to make healthier choices.
+
+The app could also provide weekly sleep reports to highlight any potential sleep-related issues and advise on the risks of both under and over-sleeping. 
+
+A yearly summary of each user's stats and goals would visually demonstrate how small lifestyle changes can make a big difference over time, motivating users to do even better in the future.
+
+We could also celebrate users' progress on our social media channels, providing encouragement and fostering a sense of community among users.
