@@ -4,7 +4,7 @@ This repository contains a collection of my data analytics projects. Each projec
 
 ### Project List
 1. [Bike-Share Data Analysis](https://github.com/saltwatersardine/Data-Analytics-Projects/blob/main/Bike_Share_Data_Analysis_Case_Study_Using_R.md)
-2. [Bellabeat data analysis](https://github.com/saltwatersardine/Data-Analytics-Projects/blob/main/Bellabeat_Data_Analysis_Using_R.md)
+2. [Bellabeat Data Analysis](https://github.com/saltwatersardine/Data-Analytics-Projects/blob/main/Bellabeat_Data_Analysis_Using_R.md)
 
 ### Software
 
