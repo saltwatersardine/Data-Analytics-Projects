@@ -187,3 +187,9 @@ This query identifies the **top 5 customers** based on their **total spend (afte
 
 ### 🧠 Think of it like:
 > “Show me my 5 biggest customers, how much they spent overall (after discounts), and which product they spent the most on — including how much and how many units.”
+
+___
+
+### 🏁 Conclusion
+
+This analysis provides a powerful, data-driven view of **who the top customers are** and **what they’re actually buying**. By combining overall customer spend with their highest-value product and the quantity purchased, this delivers a more complete picture of customer behavior — not just how much they spend, but **what drives that spend**.
