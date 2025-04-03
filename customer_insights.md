@@ -150,6 +150,12 @@ LEFT JOIN top_product_per_customer tp
 ORDER BY ct.total_spend DESC
 LIMIT 5;
 ```
+
+<img width="1276" alt="Screenshot 2025-04-03 at 14 00 57" src="https://github.com/user-attachments/assets/e5f0e493-7db1-4386-80dc-61f475b0ac04" />
+
+<img width="480" alt="Screenshot 2025-04-03 at 14 20 09" src="https://github.com/user-attachments/assets/c1086985-8d7a-4726-b896-187625a73d4b" /> <img width="480" alt="Screenshot 2025-04-03 at 14 28 36" src="https://github.com/user-attachments/assets/e6b8f62e-2f32-4815-b80f-1a2edc9ef0ba" />
+
+
 ### ✅ What This Query Does
 
 This query identifies the **top 5 customers** based on their **total spend (after discounts)** and shows details about the **product they spent the most on**.
